@@ -11,6 +11,7 @@ resource "helm_release" "cloudwatch_logs" {
     name  = "serviceAccount.name"
     value = var.service_account_name
   }
+
   set {
     name  = "cloudWatchLogs.region"
     value = var.region
@@ -18,7 +19,17 @@ resource "helm_release" "cloudwatch_logs" {
 
   set {
     name  = "cloudWatchLogs.logGroupTemplate"
-    value = "/aws/eks/${var.cluster_name}/$(kubernetes['labels']['app.kubernetes.io/name'])"
+    value = replace(var.cluster_name, "-cluster", "")
+  }
+
+  set {
+    name  = "cloudWatchLogs.logFormat"
+    value = "json"
+  }
+
+  set {
+    name  = "cloudWatchLogs.logKey"
+    value = "log"
   }
 
   set {
@@ -35,8 +46,4 @@ resource "helm_release" "cloudwatch_logs" {
     name  = "elasticsearch.enabled"
     value = var.elasticsearch_enabled
   }
-
-  values = [
-    yamlencode(var.settings)
-  ]
 }
